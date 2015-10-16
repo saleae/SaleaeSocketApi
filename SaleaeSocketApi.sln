@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaleaeSocketApi", "SaleaeSocketApi\SaleaeSocketApi.csproj", "{82E967F2-27CE-41B1-AB98-3FA98B8FDF37}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaleaeSocketApiExample", "SaleaeSocketApiExample\SaleaeSocketApiExample.csproj", "{C65F60E8-A25C-4709-8183-47B52101FE0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaleaeSocketApi", "SaleaeSocketApi\SaleaeSocketApi.csproj", "{82E967F2-27CE-41B1-AB98-3FA98B8FDF37}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaleaeSocketApiUnitTests", "SaleaeSocketApiUnitTests\SaleaeSocketApiUnitTests.csproj", "{30411D6C-23B3-4F32-ADFB-F9E0533DF3FF}"
 EndProject
