@@ -27,7 +27,14 @@ namespace Saleae.SocketApi
 			if( System.IO.Directory.Exists( folder_path ) == false )
 				System.IO.Directory.CreateDirectory( folder_path );
 
+			//commented members of ExportDataStruct are not required, and can be set to any value or not intialized at all.
+
 			//digital only tests.
+
+			//Export Digital data
+			//CSV
+			//(really tab seperated, not comma, but same main export mode)
+			//All time, all channels.
 			ExportDataStruct export_settings = new ExportDataStruct
 			{
 				FileName = folder_path + "digital_tsv_allchannels_alltime",

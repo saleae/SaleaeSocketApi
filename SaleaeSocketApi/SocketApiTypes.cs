@@ -63,6 +63,7 @@ namespace Saleae.SocketApi
 		SpecificChannels 
 	}
 
+
 	public enum DataExportMixedModeExportType
 	{
 		[Description( "DIGITAL_ONLY" )]
@@ -183,38 +184,101 @@ namespace Saleae.SocketApi
 
 	public struct ExportDataStruct
 	{
+		/// <summary>
+		/// The fully qualified path to the target file. Folder must exist. Path must be absolute. Always required
+		/// features like ~/ and %appdata% are not supported. You can exand those first before passing the path.
+		/// </summary>
 		public String FileName;
 
-		//mixed mode export type. Only applies when analog and digital channels were present in the original capture.
+		/// <summary>
+		/// This option is only required & applied IF your capture contains digital and analog channels, AND you select "Specific Channels" for the channel selection option.
+		/// i. e. If you then select digital only, you will get the native, digital only interface for an export mode.
+		/// </summary>
 		public DataExportMixedModeExportType DataExportMixedExportMode;
 
-		//Channels
+		/// <summary>
+		/// This option allows you to export all channels in the capture, or only specific channels. Alaways required
+		/// </summary>
 		public DataExportChannelSelection ExportChannelSelection;
+		/// <summary>
+		/// List channel indexes of digital channels to export. Only required if you select "SpecificChannels"
+		/// </summary>
 		public int[] DigitalChannelsToExport;
+		/// <summary>
+		/// List channel indexes of analog channels to export. Only required if you select "SpecificChannels"
+		/// </summary>
 		public int[] AnalogChannelsToExport;
 
-		//Time Range
+		/// <summary>
+		/// Export all time, or just export a specific range of time. Always required
+		/// Command will NAK if a custom time range extends past captured data.
+		/// </summary>
 		public DataExportSampleRangeType SamplesRangeType; //{ RangeAll, RangeTimes }
+		/// <summary>
+		/// Start time of export. Only appies if "RangeTimes" is set.
+		/// Relative to trigger sample, can be negative.
+		/// </summary>
 		public double StartingTime;
+		/// <summary>
+		/// End time of export. Only appies if "RangeTimes" is set.
+		/// Relative to trigger sample, can be negative.
+		/// </summary>
 		public double EndingTime;
 
-		//Export Type
+		/// <summary>
+		/// Primary export type. Always required
+		/// </summary>
 		public DataExportType DataExportType; //{ ExportBinary, ExportCsv, ExportVcd }
 
-		//Type: CSV (only set if Export type is CSV)
+
+		/// <summary>
+		/// Required for all CSV exports.
+		/// </summary>
 		public CsvHeadersType CsvIncludeHeaders; //{ CsvIncludesHeaders, CsvNoHeaders }
+		/// <summary>
+		/// Required for all CSV exports
+		/// </summary>
 		public CsvDelimiterType CsvDelimiterType;//{ CsvComma, CsvTab }
+		/// <summary>
+		/// Required only when exporting digital only CSV.
+		/// Does not apply when exporting analog and digital or analog only.
+		/// </summary>
 		public CsvOutputMode CsvOutputMode;//{ CsvSingleNumber, CsvOneColumnPerBit }
+		/// <summary>
+		/// Only applies when exporting digital only CSV
+		/// Does not apply when exporting analog and digital or analog only. (time values used)
+		/// </summary>
 		public CsvTimestampType CsvTimestampType;//{ CsvTime, CsvSample }
+		/// <summary>
+		/// Required when exporting analog samples as raw ADC value.
+		/// Also Required when exporting digital only data in "CsvSingleNumber" format
+		/// </summary>
 		public CsvBase CsvDisplayBase;//{ CsvBinary, CsvDecimal, CsvHexadecimal, CsvAscii }
+		/// <summary>
+		/// Only required when exporting digital only CSV data.
+		/// CsvTransition produces a smaller file where only transition timestamps are exported
+		/// CsvComplete includes every single sample
+		/// </summary>
 		public CsvDensity CsvDensity;//{ CsvTransition, CsvComplete }
 
+
 		//Type: Binary
+		/// <summary>
+		/// Only required for digital only Binary mode
+		/// </summary>
 		public BinaryOutputMode BinaryOutputMode;//{ BinaryEverySample, BinaryEveryChange }
+		/// <summary>
+		/// Only required for digital only Binary mode
+		/// </summary>
 		public BinaryBitShifting BinaryBitShifting;//{ BinaryOriginalBitPositions, BinaryShiftRight }
+		/// <summary>
+		/// Only required for digital only Binary mode
+		/// </summary>
 		public BinaryOutputWordSize BinaryOutputWordSize;//{ Binary8Bit, Binary16Bit, Binary32Bit, Binary64Bit }
 
-		//Type: Analog Value
+		/// <summary>
+		/// ADC values or floating point voltages. Required for all export types that include analog channels
+		/// </summary>
 		public AnalogOutputFormat AnalogFormat; //This feature needs v1.1.32+ 
 	}
 
