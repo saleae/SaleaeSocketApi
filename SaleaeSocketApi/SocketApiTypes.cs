@@ -294,7 +294,7 @@ namespace Saleae.SocketApi
 		public int Index { get; set; }
 	}
 
-	class SaleaeSocketApiException : Exception
+	public class SaleaeSocketApiException : Exception
 	{
 		public SaleaeSocketApiException()
 			: base()
