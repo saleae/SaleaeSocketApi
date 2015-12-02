@@ -720,7 +720,7 @@ namespace Saleae.SocketApi
 		}
 
 		/// <summary>
-		/// Calls IsAnalyzerProcessingComplete every 250 ms.
+		/// Calls IsProcessingComplete every 250 ms.
 		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="timeout"></param>
