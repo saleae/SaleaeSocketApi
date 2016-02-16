@@ -46,13 +46,13 @@ namespace Saleae.SocketApi
 		FallingEdge,
 		[Description( "POSEDGE" )]
 		RisingEdge,
-		[Description( "POSPULSE" )]
-		NegativePulse,
 		[Description( "NEGPULSE" )]
+		NegativePulse,
+		[Description( "POSPULSE" )]
 		PositivePulse 
 	};
 
-	public enum PerformanceOption { Full = 100, Half = 50, Third = 33, Quarter = 25, Low = 20 };
+	public enum PerformanceOption { OneHundredPercent = 100, EightyPercent = 80, SixtyPercent = 60, FortyPercent = 40, TwentyPercent = 20 };
 
 	//Export Data
 	public enum DataExportChannelSelection
@@ -182,6 +182,13 @@ namespace Saleae.SocketApi
 
 	}
 
+	public class DigitalVoltageOption
+	{
+		public int Index;
+		public String Description;
+		public bool IsSelected;
+	}
+
 	public struct ExportDataStruct
 	{
 		/// <summary>
@@ -286,6 +293,31 @@ namespace Saleae.SocketApi
 	{
 		public int AnalogSampleRate { get; set; }
 		public int DigitalSampleRate { get; set; }
+
+		public static bool operator ==( SampleRate a, SampleRate b )
+		{
+			// If both are null, or both are same instance, return true.
+			if( System.Object.ReferenceEquals( a, b ) )
+			{
+				return true;
+			}
+
+			// If one is null, but not both, return false.
+			if( ( ( object )a == null ) || ( ( object )b == null ) )
+			{
+				return false;
+			}
+
+			// Return true if the fields match:
+			return a.AnalogSampleRate == b.AnalogSampleRate && a.DigitalSampleRate == b.DigitalSampleRate;
+		}
+
+		public static bool operator !=( SampleRate a, SampleRate b )
+		{
+			return !( a == b );
+		}
+
+
 	}
 
 	public struct Analyzer

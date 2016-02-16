@@ -21,7 +21,9 @@ namespace Saleae.SocketApi
 		//Command strings
 		const String set_trigger_cmd = "SET_TRIGGER";
 		const String set_num_samples_cmd = "SET_NUM_SAMPLES";
+		const String get_sample_rate_cmd = "GET_SAMPLE_RATE";
 		const String set_sample_rate_cmd = "SET_SAMPLE_RATE";
+
 		const String set_capture_seconds_cmd = "SET_CAPTURE_SECONDS";
 		const String capture_to_file_cmd = "CAPTURE_TO_FILE";
 		const String save_to_file_cmd = "SAVE_TO_FILE";
@@ -48,6 +50,9 @@ namespace Saleae.SocketApi
 		const String get_performance_cmd = "GET_PERFORMANCE";
 		const String is_processing_complete_cmd = "IS_PROCESSING_COMPLETE";
 		const String is_analyzer_complete_cmd = "IS_ANALYZER_COMPLETE";
+
+		const String set_digital_voltage_option_cmd = "SET_DIGITAL_VOLTAGE_OPTION";
+		const String get_digital_voltage_options_cmd = "GET_DIGITAL_VOLTAGE_OPTIONS";
 
 		const String close_all_tabs_cmd = "CLOSE_ALL_TABS";
 
@@ -101,6 +106,7 @@ namespace Saleae.SocketApi
 
 		/// <summary>
 		/// Set the capture trigger. Every active digital channel must be set, in order.
+		/// To ignore the maximum_pulse_width_s parameter, set it to 0.
 		/// </summary>
 		/// <param name="triggers">List of triggers for active channels. Ex"High, Low, Posedge, Negedge, Low, High, ..."</param>
 		public void SetTrigger( Trigger[] triggers, double minimum_pulse_width_s = 0.0, double maximum_pulse_width_s = 1.0 )
@@ -119,7 +125,8 @@ namespace Saleae.SocketApi
 				if( channel == Trigger.PositivePulse || channel == Trigger.NegativePulse )
 				{
 					command.Add( minimum_pulse_width_s.ToString() );
-					command.Add( maximum_pulse_width_s.ToString() );
+					if( maximum_pulse_width_s > 0 )
+						command.Add( maximum_pulse_width_s.ToString() );
 				}
 
 			}
@@ -159,6 +166,58 @@ namespace Saleae.SocketApi
 			GetResponse( ref response );
 		}
 
+		public void SetDigitalVoltageOption( DigitalVoltageOption option )
+		{
+			string command = set_digital_voltage_option_cmd;
+			command += ", " + option.Index.ToString();
+			WriteString( command );
+
+			String response = "";
+			GetResponse( ref response );
+
+
+		}
+		/// <summary>
+		/// Requires 1.2.6 or later software, otherwise it will throw
+		/// </summary>
+		/// <returns>List of possible IO threshold settings, if the active device supports multiple threshold voltages</returns>
+		public List<DigitalVoltageOption> GetDigitalVoltageOptions()
+		{
+			string command = get_digital_voltage_options_cmd;
+			WriteString( command );
+
+			String response = "";
+			try
+			{
+				GetResponse( ref response );
+			}
+			catch( SaleaeSocketApiException ex )
+			{
+				//NAKed. No voltage options.
+				return null;
+			}
+
+			var elems = response.Split( ',', '\n' ).Select( x => x.Trim() ).ToList();
+
+			int voltage_count = elems.Count() / 3;
+			List<DigitalVoltageOption> voltage_options = new List<DigitalVoltageOption>();
+
+			for( int i = 0; i < voltage_count; ++i )
+			{
+				int index = i * 3;
+				voltage_options.Add( new DigitalVoltageOption
+				{
+					Index = int.Parse( elems[index] ),
+					Description = elems[index+1],
+					IsSelected = elems[ index + 2 ].Contains( "SELECTED" ) && !elems[ index + 2 ].Contains( "NOT_SELECTED" )
+				} );
+
+			}
+
+			return voltage_options;
+
+		}
+
 		/// <summary>
 		/// Closes all currently open tabs.
 		/// </summary>
@@ -185,6 +244,27 @@ namespace Saleae.SocketApi
 
 			String response = "";
 			GetResponse( ref response );
+		}
+
+		/// <summary>
+		/// Return the currently selected sample rate.
+		/// </summary>
+		/// <returns>Currently Selected Sample Rate</returns>
+		public SampleRate GetSampleRate()
+		{
+			String command = get_sample_rate_cmd;
+			WriteString( command );
+
+			String response = "";
+			GetResponse( ref response );
+
+			var elems = response.Split( '\n' ).Take(2).Select( x => int.Parse( x.Trim() ) ).ToList();
+
+			if( elems.Count() != 2 )
+				throw new SaleaeSocketApiException( "unexpected value" );
+
+			return new SampleRate() { DigitalSampleRate = elems[ 0 ], AnalogSampleRate = elems[ 1 ] };
+
 		}
 
 		/// <summary>
@@ -679,7 +759,7 @@ namespace Saleae.SocketApi
 			String response = "";
 			GetResponse( ref response );
 
-			PerformanceOption selected_option = ( PerformanceOption )Convert.ToInt32( response.Split( ',' )[ 0 ] );
+			PerformanceOption selected_option = ( PerformanceOption )Convert.ToInt32( response.Split( '\n' ).First() );
 			return selected_option;
 		}
 

@@ -30,16 +30,20 @@ namespace Saleae.SocketApi
 			//lets run a quick demo!
 			Console.WriteLine( "Logic Socket API demonstation application.\n" );
 
+			//Get IP address of software.
 			Console.WriteLine( "enter host IP address, or press enter for localhost" );
 			String host = Console.ReadLine();
 			if( host.Length == 0 )
 				host = "127.0.0.1";
+
+			//Get port of software
 			Console.WriteLine( "enter host port, or press enter for default ( 10429 )" );
 			String port_str = Console.ReadLine();
 			if( port_str.Length == 0 )
 				port_str = "10429";
 			int port = int.Parse( port_str );
 
+			//attempt to connect with socket.
 			Console.WriteLine( "Connecting..." );
 			try
 			{
@@ -54,6 +58,7 @@ namespace Saleae.SocketApi
 			StringHelper.WriteLine( "Connected" );
 			Console.WriteLine( "" );
 
+			//Get a list of connected devices. (when no devices are connected, this should return 4 simulation devices)
 			var devices = Client.GetConnectedDevices();
 			var active_device = devices.Single( x => x.IsActive == true );
 
@@ -65,6 +70,7 @@ namespace Saleae.SocketApi
 			Console.WriteLine( "Press Enter to Continue" );
 			Console.ReadLine();
 
+			//list all analyzers currently added to the session.
 			var analyzers = Client.GetAnalyzers();
 
 			if( analyzers.Any() )
@@ -76,6 +82,7 @@ namespace Saleae.SocketApi
 				Console.ReadLine();
 			}
 
+			//change the active channels, but only if the active device supports that.
 			if( active_device.DeviceType == DeviceType.Logic8 || active_device.DeviceType == DeviceType.LogicPro8 || active_device.DeviceType == DeviceType.LogicPro16 )
 			{
 				Console.WriteLine( "changing active channels" );
@@ -84,6 +91,16 @@ namespace Saleae.SocketApi
 				Console.WriteLine( "Press Enter to Continue" );
 				Console.ReadLine();
 
+				//display the currently selected sample rate and performance option.
+				var current_sample_rate = Client.GetSampleRate();
+				Console.WriteLine( "The previously selected sample rate was: " + current_sample_rate.DigitalSampleRate.ToString() + " SPS (digital), " + current_sample_rate.AnalogSampleRate.ToString() + " SPS (analog)" );
+				if( current_sample_rate.AnalogSampleRate > 0 && current_sample_rate.DigitalSampleRate > 0 )
+				{
+					PerformanceOption current_performance_option = Client.GetPerformanceOption();
+					Console.WriteLine( "Currently selected performance option: " + current_performance_option.ToString() );
+				}
+
+				//change the sample rate!
 				var possible_sample_rates = Client.GetAvailableSampleRates();
 
 				if( possible_sample_rates.Any( x => x.AnalogSampleRate == 125000 ) )
@@ -109,12 +126,21 @@ namespace Saleae.SocketApi
 				Console.WriteLine( "to see more cool features demoed by this example, please switch to a Logic 8, Logic Pro 8, or Logic Pro 16. Physical or simulation" );
 			}
 
+			if( active_device.DeviceType == DeviceType.LogicPro8 || active_device.DeviceType == DeviceType.LogicPro16 || active_device.DeviceType == DeviceType.Logic16 )
+			{
+				DigitalVoltageOption voltage_option = Client.GetDigitalVoltageOptions().SingleOrDefault( x => x.IsSelected == true );
+				if( voltage_option != null )
+					Console.WriteLine( "Currently selected voltage option: " + voltage_option.Description );
+			}
+
+			//change the recording length to 250 ms.
 			Console.WriteLine( "setting capture time" );
 			Client.SetCaptureSeconds( 0.25 );
 			Console.WriteLine( "" );
 			Console.WriteLine( "Press Enter to Continue" );
 			Console.ReadLine();
 
+			//start a capture.
 			Console.WriteLine( "starting capture" );
 			Client.Capture();
 			Console.WriteLine( "" );
