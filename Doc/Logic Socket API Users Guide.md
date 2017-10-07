@@ -89,7 +89,7 @@ Client.FunctionCall();
 
 This command lets you configure the trigger. The command must be sent with the
 same number of parameters as there are channels in the software. For use with
-Logic, 8 parameters must be present. Blank parameters are allowed.
+Logic, 8 parameters must be present. Blank parameters are allowed. Also, if the trigger type is `negedge` or `posedge`, then the minimum and maximum pulse widths should be included immediately after the trigger type. Only a minimum pulse width is required though. If no maximum pulse width is specified, then any pulse longer than the specified minimum will be a valid trigger condition.
 
 Parameter value options:
 
@@ -97,17 +97,27 @@ Parameter value options:
 * `low`
 * `negedge`
 * `posedge`
+* `pospulse`
+* `negpulse`
 
-Example:
+Examples:
+
+8 Channels, with channel 2 set as a rising edge, with the additional requirement that channel 0 and channel 7 are high and channel 1 is low at the time of the rising edge. Channels 3-6 are not used by the trigger and left blank.
 
 `set_trigger, high, low, posedge,,,,,high`
 
+4 channels, with a positive pulse on channel 0, no other channels used by the trigger. The pulse must be between 1ms and 2ms in duration.
 
+`set_trigger, pospulse, 0.001, 0.002,,,`
 
-**C# Function**: `void SetTrigger(Trigger[] triggers)`
+4 channels, same as above, but without a maximum pulse width. This sets the maximum pulse with to 'n/a' in the software. Note that there is not an additional placeholder for the maximum pulse width.
+
+`set_trigger, pospulse, 0.001,,,,`
+
+**C# Function**: `void SetTrigger(Trigger[] triggers, double minimum_pulse_width_s = 0.0, double maximum_pulse_width_s = 1.0)`
 
 The function takes in an array of `enum Trigger`. The index of the array
-corresponds to the channel.
+corresponds to the channel. If a pulse trigger is used, then `minimum_pulse_width_s` and `maximum_pulse_width_s are used`. If `maximum_pulse_width_s` is set to 0.0, then no pulse width limit is used.
 
 Example:
 
@@ -125,6 +135,8 @@ This command changes the number of samples to capture. (Note: USB transfer
 chunks are about 33ms of data, so the number of samples you actually get are in
 steps of 33ms)
 
+If both analog and digital channels are enabled, this sets the number of digital samples to record.
+
 Example:
 
 `set_num_samples, 1000000`
@@ -137,6 +149,25 @@ This function takes an integer to set the desired number of samples.
 
 
 
+### Get Number of Samples in Collection
+
+**Socket Command: get_num_samples**
+
+This function returns the number of samples to capture.
+
+If both digital and analog channels are enabled, this returns the number of digital channels to record.
+
+Example:
+
+`get_num_samples`
+
+Return Value:
+
+`1000000`
+
+This function is not wrapped by the C# wrapper presently.
+
+
 **Socket Command: set_capture_seconds**
 
 This command changes the number of seconds to capture for.
@@ -144,7 +175,6 @@ This command changes the number of seconds to capture for.
 Example:
 
 `set_capture_seconds, 0.8`
-
 
 
 **C# Function:** `void SetCaptureSeconds(double seconds)`
@@ -180,14 +210,32 @@ Both analog and digital capture: `set_sample_rate, 2000000, 1000000`
 The function takes a struct that holds both the digital sample rate and the
 analog sample rate.
 
+### Get Selected Collection Sample Rate
+
+**Socket Command: get_sample_rate**
+
+This command returns the currently selected sample rate. It returns two numbers, the digital sample rate and the analog sample rate. These are delimited with a newline, and the response ends with a newline.
+
+Syntax: `get_sample_rate`
+
+Example: `get_sample_rate`
+
+The current sample rate is 1 MS/s, digital only.
+
+Response: `1000000\n0\n`
 
 
-### Get Avaliable Sample Rates
+
+**C# Function:** `SampleRate GetSampleRate()`
+
+The function returns a struct containing the current sample rates.
+
+### Get Available Sample Rates
 
 **Socket Command: get_all_sample_rates**
 
 This command returns all the available sample rate combinations for the current
-performance level and channel combination.
+performance level and channel combination. Each newline is a separate sample rate pair. Analog and digital sample rates are separated by a comma.
 
 Example: `get_all_sample_rates`
 
@@ -232,7 +280,7 @@ This function returns the currently-selected performance option in the form of
 an enum value.
 
 ```C#
-enum PerformanceOption { Full = 100, Half = 50, Third = 33, Quarter = 25, Low = 20 };
+enum PerformanceOption { OneHundredPercent = 100, EightyPercent = 80, SixtyPercent = 60, FortyPercent = 40, TwentyPercent = 20 };
 ```
 
 
@@ -242,12 +290,26 @@ enum PerformanceOption { Full = 100, Half = 50, Third = 33, Quarter = 25, Low = 
 **Socket Command: set_performance**
 
 This command sets the currently-selected performance option. Valid performance
-options are: 20, 25, 33, 50, and 100. Note: This call will change the sample
+options are: 20, 40, 60, 80, and 100. Note: This call will change the sample
 rate currently selected.
+
+Performance selection only applies to the new Logic 8, Logic Pro 8, and Logic Pro 16. Performance selection also only applies when digital and analog channels are enabled for the same capture. 
+
+Performance does not apply to the original Logic, Logic16, or Logic 4. It also does not apply when the support devices are only capturing digital or only capturing analog channels.
+
+The performance option is used as a second dimension of sample rate control When performing mixed captures.
+
+When performing a digital-only capture or an analog-only capture, the available list of sample rates contain every possible sample rate for the given number of channels.
+
+However, when a mixed mode capture is occurring, the sample rate list instead includes a list of sample rates that represent the trade-off between faster digital with slower analog and faster analog with slower digital rates. To lower the overall rate, performance is used.
+
+Performance specifically limits the maximum throughput between the device and the PC, as a percentage.
+
+For mixed mode captures, the list of available sample rates for a given device are a function of three factors. The total number of digital channels enabled, the number of analog channels enabled, and the performance option selected.
 
 Syntax: `set_performance, $(value)`
 
-Example: `set_performance, 50`
+Example: `set_performance, 80`
 
 
 
@@ -263,6 +325,12 @@ This function sets the currently-selected performance option to the value of
 **Socket Command: get_capture_pretrigger_buffer_size**
 
 This command gets the pretrigger buffer size of the capture.
+
+Due to a bug in the Logic software, this returns an unusual value when both digital and analog channels are enabled.
+
+Specifically, in mixed mode captures, it returns the number of samples at the LCM sample rate, which is the least common multiple of the digital and analog sample rates. 
+
+Note that the set function does not have this issue.
 
 Example:
 
@@ -280,9 +348,11 @@ The function returns an integer with the current pretrigger buffer size.
 
 **Socket Command: set_capture_pretrigger_buffer_size**
 
-This command sets the pretrigger buffer size of the capture. Note: Currently
-the pretrigger buffer size has to be one of the following values: `1000000`,
-`10000000`, `100000000`, or `1000000000`.
+This command sets the pretrigger buffer size of the capture.
+
+If both analog and digital channels are enabled, this sets the number of digital samples.
+
+The software does not support setting this value to 0. Always use values greater than 0.
 
 Example:
 
@@ -429,7 +499,7 @@ This function takes no parameters and returns none.
 
 ### Get Digital I/O Voltage Threshold
 
-**Socket Command: get_full_scale_voltage_range**
+**Socket Command: get_digital_voltage_options**
 
 This command returns a list of the available digital input I/O thresholds. This
 is used on products with selectable input voltage thresholds. For instance,
@@ -467,7 +537,7 @@ ACK
 
 ### Set Digital I/O Voltage Threshold
 
-**Socket Command: set_full_scale_voltage_range**
+**Socket Command: set_digital_voltage_option**
 
 This command sets the active digital I/O voltage threshold for the device. The
 only parameter is the index provided from the getter function.
@@ -493,6 +563,21 @@ Example:
 
 This command starts a capture. It will return `NAK` if an error occurs.
 
+The function will return `ACK` when the capture is complete.
+
+Error cases:
+
+- The capture fails to start due to a USB error.
+  The software will return `NAK`
+- The capture ends early due to a 'can\'t keep up' error.
+  The software will return `ACK`, and the capture will be shorter than expected
+- The capture ends early due to a 'can\'t keep up' error, however the trigger condition was never found.
+  The software will return `NAK` because no data was captured.
+- The `stop_capture` command is sent to the socket API before the capture completed
+  THe software will return `ACK` and the capture will be shorter than expected
+- The `stop_capture` command is sent to the socket API before the trigger event has been detected.
+  THe software will return `NAK` since no data was recorded.
+
 Example:
 
 `capture`
@@ -502,6 +587,8 @@ Example:
 **C# Function**: `void Capture()`
 
 The function takes no parameters.
+
+Note, the C# wrapper will block until the command ACKs or NAKs. This makes it unsuitable for use with `stop_capture` without modification.
 
 Example:
 
@@ -513,13 +600,17 @@ Example:
 
 **Socket Command: stop_capture**
 
-This command stops the current capture. It will `ACK` if data is present after
-the capture is stopped or it will `NAK` if no data is present.
+This command stops the current capture. This command will return `NAK` if no capture is in progress.
+
+If a capture is in progress, it does not return a response. Instead, it initiates the end of the capture, and then the active capture command will send it's reply, either a `ACK` if any data is recorded, or a `NAK` if the capture was terminated before the trigger condition was found.
+
+Use this function with care, as a race condition determines if one or two responses will be returned. This will be improved in future versions of the socket API and C# wrapper.
+
+Specifically, if the `stop_capture` command is issued near simultaneously with the normal end of the capture, it is possible to get a single `ACK` response or two responses, `ACK` followed by `NAK`. The first is the case where the stop command ends the capture early, and the second case is when the stop command is applied after the capture has already completed, returning `NAK`.
 
 Example:
 
 `stop_capture`
-
 
 
 **C# Function:** `void StopCapture()`
@@ -527,6 +618,8 @@ Example:
 The function takes no parameters.
 
 **Note:** The C# capture command blocks until the capture is complete.
+
+As it is currently implemented, this function is not usable with the current `capture` command. In the future, we will add a non-blocking capture command to the C# wrapper.
 
 Example:
 
@@ -547,7 +640,7 @@ drive on Windows. To do this, the Logic software must be launched with
 administrator privileges.
 
 The path passed in must be absolute and the destination directory must exist,
-or the software will `NAK`.
+or the software will `NAK`. Relative paths and paths with special features like `~/` are not accepted.
 
 Example:
 
@@ -561,15 +654,7 @@ The function takes a string with the file name to save to.
 
 Example:
 
-`CaptureToFile("C:/temp_file");`
-
-
-
-### Get Inputs
-
-**Socket Command: get_inputs**
-
-This command has been disabled temporarily.
+`CaptureToFile("C:\\temp_file");`
 
 
 
@@ -582,6 +667,9 @@ and may take some time after the capture. You cannot export or save data until
 processing is complete (The commands will `NAK`). This command returns a
 boolean expressing whether or not the software is done processing data.
 
+Note - we recommend waiting for just a moment after the capture completes before calling this function. The socket API largely emulates UI interactions, and the UI session may not have finished switching the moment the capture completed. This will be fixed in future revisions of the app. We recommend 1 second in the worst case to be sure the session has finished transitioning.
+
+This function returns `TRUE` or `FALSE`, followed by a newline, and then a `ACK`. If no capture is opened, it will return a `NAK`.
 
 
 **C# Function:** `bool IsProcessingComplete()`
@@ -617,7 +705,7 @@ The function takes a string with the file name to save to.
 Example:
 
 ```C#
-SaveToFile("C:/temp_file");
+SaveToFile("C:\\temp_file");
 ```
 
 
@@ -630,6 +718,8 @@ This command loads the results of a previous capture from a specific file.
 
 The path passed in must be absolute and the destination directory must exist,
 or the software will `NAK`.
+
+This command can also be used to load a saved setup and apply to the currently open tab.
 
 
 
@@ -654,7 +744,7 @@ Example:
 **Socket Command: close_all_tabs**
 
 This command closes all currently-open tabs. This command does not delete the
-data in the capture tab.
+data in the capture tab. The command ACKs when complete.
 
 Example:
 
@@ -934,6 +1024,8 @@ ExportData(ex_data_struct);[]
 This function will return a list of analyzers currently attached to the
 capture, along with indexes so you can access them later.
 
+Note, the indices may not be sequential, and are unlikely to be so. It's also unlikely that they will start at zero, even if only one analyzer is present. Indices can change between captures. Be sure to always check analyzer indices when calling other analyzer specific APIs. 
+
 Example:
 
 `get_analyzers`
@@ -971,7 +1063,7 @@ Example:
 
 ### Export Analyzers
 
-**Socket Command:** `export_analyzers`
+**Socket Command:** `export_analyzer`
 
 This command is used to export the analyzer results to a specified file. Pass
 in the index from the `get_analyzers` function, along with the path to save to.
@@ -981,6 +1073,8 @@ or the software will `NAK`.
 
 Add a third, optional parameter to have the results piped back through the TCP
 socket to you.
+
+Note, an analyzer must finish processing before it can export its complete results. Use is_analyzer_complete to check if the analyzer has finished processing yet.
 
 Example:
 
@@ -1010,7 +1104,9 @@ be fixed in future versions.
 The function takes 3 parameters. The first is the index of the analyzer
 returned from the `GetAnalyzers()` function. The second is the filename to save
 to, and the third determines whether or not to pipe the information back
-through the TCP socket to you.
+through the TCP socket to you. 
+
+Note, this function was not setup to anything useful with streamed results. It currently just prints them to the console.
 
 
 
@@ -1036,3 +1132,16 @@ Example:
 This function takes the analyzer index and returns true if it is done
 processing data and safe to export.
 
+
+### Exit
+
+**Socket Command: exit**
+
+This command closes the software. It returns `ACK` before the software exits.
+
+Syntax: `exit`
+
+
+**C# Function:**
+
+This function is not currently covered by the C# wrapper.
