@@ -119,10 +119,12 @@ Examples:
 The function takes in an array of `enum Trigger`. The index of the array
 corresponds to the channel. If a pulse trigger is used, then `minimum_pulse_width_s` and `maximum_pulse_width_s are used`. If `maximum_pulse_width_s` is set to 0.0, then no pulse width limit is used.
 
+Note: the enum names in the provided C# library do not exactly match the names actually used by the socket API. The C# enum values (FallingEdge, RisingEdge, etc...) are mapped to the socket string names using C# attributes. The Trigger enum is defined in `SocketApiTypes.cs`.
+
 Example:
 
 ```C#
-Trigger[] trigger = {Trigger.High, Trigger.Posedge, Trigger.None, Trigger.Low, Trigger.High, Trigger.High, Trigger.None, Trigger.None };
+Trigger[] trigger = {Trigger.High, Trigger.RisingEdge, Trigger.None, Trigger.Low, Trigger.High, Trigger.High, Trigger.None, Trigger.None };
 
 SetTrigger(trigger);
 ```
@@ -690,7 +692,7 @@ Note: Data processing must be complete before this command is ran or it may
 exporting data.
 
 The path passed in must be absolute and the destination directory must exist,
-or the software will `NAK`.
+or the software will `NAK`. Special path symbols like `~/` are not interpreted properly and should not be used.
 
 Example:
 
@@ -717,7 +719,7 @@ SaveToFile("C:\\temp_file");
 This command loads the results of a previous capture from a specific file.
 
 The path passed in must be absolute and the destination directory must exist,
-or the software will `NAK`.
+or the software will `NAK`. Special path symbols like `~/` are not interpreted properly and should not be used.
 
 This command can also be used to load a saved setup and apply to the currently open tab.
 
@@ -1069,7 +1071,7 @@ This command is used to export the analyzer results to a specified file. Pass
 in the index from the `get_analyzers` function, along with the path to save to.
 
 The path passed in must be absolute and the destination directory must exist,
-or the software will `NAK`.
+or the software will `NAK`. Special path symbols like `~/` are not interpreted properly and should not be used.
 
 Add a third, optional parameter to have the results piped back through the TCP
 socket to you.
