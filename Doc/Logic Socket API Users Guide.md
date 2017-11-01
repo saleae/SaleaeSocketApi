@@ -723,7 +723,7 @@ or the software will `NAK`. Special path symbols like `~/` are not interpreted p
 
 This command can also be used to load a saved setup and apply to the currently open tab.
 
-
+Note: The Logic software uses the file extension of the loaded file in order to determine what type of file is being loaded. The file must be a valid logic settings or logic data file, ending with either the `*.logicdata` or `*.logicsettings` file extension.
 
 Example:
 
