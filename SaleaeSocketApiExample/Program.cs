@@ -143,16 +143,17 @@ namespace Saleae.SocketApi
 			//start a capture.
 			Console.WriteLine( "starting capture" );
 			Client.Capture();
-			Console.WriteLine( "" );
-			Console.WriteLine( "Press Enter to Exit" );
+			Console.WriteLine( "capture complete" );
+            //the following 3 functions require software 1.2.18 or newer. 
+            var range = Client.GetCaptureRange(); //1.2.18+
+            var view_state = Client.GetViewState(); //1.2.18+
+            Console.WriteLine("Press Enter to Continue");
+            Console.ReadLine();
+            Console.WriteLine("Setting ViewState");
+            Client.SetViewState(500.0, range.TriggerSample); //1.2.18+
+
+            Console.WriteLine( "Press Enter to Exit" );
 			Console.ReadLine();
-
-
-
-
-
 		}
-
-	
 	}
 }

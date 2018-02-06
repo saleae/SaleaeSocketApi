@@ -1135,6 +1135,80 @@ This function takes the analyzer index and returns true if it is done
 processing data and safe to export.
 
 
+### Get Capture Range
+
+*This function requires Logic 1.2.18 or newer*
+
+This command will return information on how many samples were collected in the open capture.
+Only issue this command if a capture is open.
+It returns 4 values:
+
+- Starting Sample. This is the index of the first accessible sample in the recording. It's usually zero, except when a trigger is used and the pre-trigger buffer was completely full, causing data older than the pre-trigger buffer size to be deleted.
+- Trigger Sample. Usually zero, except for when a trigger was used.
+- Ending sample. The last sample index in the capture.
+- LCM Sample Rate. Use this sample rate to convert between time and sample index. this is the least common multiple of the digital and analog sample rates used for the capture.
+
+Syntax: `get_capture_range`
+
+Response:
+
+```
+<starting sample>, <trigger sample>, <ending sample>, <lcm sample>
+```
+
+*Note that the 3 sample indexes are unsigned 64 bit integers, and will frequently exceed the size of a 32 bit integer. Take care to perform all operations on these numbers using 64 bit integers.*
+
+The LCM sample rate is a 32 bit integer.
+
+**C# Function:** `CaptureRange GetCaptureRange()`
+
+This function returns a struct containing the parsed return values.
+
+### Get View State
+
+*This function requires Logic 1.2.18 or newer*
+
+This command returns the current zoom and pan offset of the display.
+Only issue this command if a capture is open.
+
+It returns 3 values:
+
+- Zoom Samples Per Pixel. This is the zoom level of the display, in units how many samples are represented by a single horizontal pixel. Large numbers indicate that the view is zoomed out, displaying a large part of the capture in a small number of pixels. Small values indicate that the display is zoomed in.
+- Pan Starting Sample. This is the sample index of the first sample on the left edge of the graph.
+- LCM Sample Rate. Use this sample rate to convert between time and sample index. this is the least common multiple of the digital and analog sample rates used for the capture.
+
+Syntax: `get_viewstate`
+
+Response:
+
+```
+<zoom samples per pixel>, <pan starting sample>, <LCM sample rate>
+```
+
+**C# Function:** `ViewState GetViewState()`
+
+This function returns a struct containing the parsed return values.
+
+### Set View State
+
+*This function requires Logic 1.2.18 or newer*
+
+This command sets the current zoom and pan offset of the display.
+Only issue this command if a capture is open.
+
+There are two parameters:
+
+- zoom samples per pixel. This is the zoom level, as described in 'Get View State', as a double precision floating point number.
+- pan starting sample. This is the index of the first sample on the left edge of the display, as described above. It is a double precision floating point number.
+
+The zoom level does not have fixed limits. You can zoom in until there are only 5 real samples on the display. Settings values more zoomed in than this will snap to this zoom level. You can zoom out until the entire dataset is on the display at once. Zooming out further will snap to this level.
+The Pan is limited to keeping data covering the entire graph - you cannot pan the data so far that the graph becomes blank on either side.
+Use the LCM sample rate returned from the above function in order to convert between time and sample indexes.
+
+Syntax: `get_viewstate, 100.0, 10000.0`
+
+**C# Function:** `void SetViewState( double zoom_samples_per_pixel, double pan_starting_sample )`
+
 ### Exit
 
 **Socket Command: exit**

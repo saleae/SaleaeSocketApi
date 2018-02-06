@@ -56,7 +56,13 @@ namespace Saleae.SocketApi
 
 		const String close_all_tabs_cmd = "CLOSE_ALL_TABS";
 
-		public SaleaeClient( String host_str = "127.0.0.1", int port_input = 10429 )
+        const String exit = "EXIT";
+
+        const String get_capture_range_cmd = "GET_CAPTURE_RANGE";
+        const String get_viewstate_cmd = "GET_VIEWSTATE";
+        const String set_viewstate_cmd = "SET_VIEWSTATE";
+
+        public SaleaeClient( String host_str = "127.0.0.1", int port_input = 10429 )
 		{
 			this.port = port_input;
 			this.host = host_str;
@@ -933,6 +939,81 @@ namespace Saleae.SocketApi
 			String response = "";
 			GetResponse( ref response );
 		}
+
+        /// <summary>
+        /// Returns the index of the first valid sample (0, unless a trigger was used)
+        /// The trigger Sample (0, unless a trigger was used)
+        /// The ending sample.
+        /// The LCM Sample Rate (least common multiple)
+        /// Sample indexes are in LCM samples, which is the least common multiple of the digital sample rate and the analog sample rate
+        /// The requires Logic software version 1.2.18 or greater.
+        /// </summary>
+        /// <returns></returns>
+        public CaptureRange GetCaptureRange()
+        {
+            String export_command = get_capture_range_cmd;
+            WriteString(export_command);
+
+            String response = "";
+            GetResponse(ref response);
+            //remove trailing ACK
+            if (!response.EndsWith("ACK"))
+                throw new SaleaeSocketApiException("invalid reponse");
+            response = response.Remove(response.LastIndexOf("ACK"));
+
+            String[] input_string = response.Split(',');
+
+            return new CaptureRange
+            {
+                StartingSample = UInt64.Parse(input_string[0]),
+                TriggerSample = UInt64.Parse(input_string[1]),
+                EndingSample = UInt64.Parse(input_string[2]),
+                LcmSampleRate = UInt32.Parse(input_string[3])
+            };
+        }
+
+        /// <summary>
+        /// Returns the current viewstate information of the open tab. 
+        /// The requires Logic software version 1.2.18 or greater.
+        /// </summary>
+        /// <returns></returns>
+        public ViewState GetViewState()
+        {
+            String export_command = get_viewstate_cmd;
+            WriteString(export_command);
+
+            String response = "";
+            GetResponse(ref response);
+        
+            //remove trailing ACK
+            if (!response.EndsWith("ACK"))
+                throw new SaleaeSocketApiException("invalid reponse");
+            response = response.Remove(response.LastIndexOf("ACK"));
+
+            String[] input_string = response.Split(',');
+
+            return new ViewState
+            {
+                ZoomSamplesPerPixel = double.Parse(input_string[0]),
+                PanStartingSample = double.Parse(input_string[1]),
+                LcmSampleRate = UInt32.Parse(input_string[2])
+            };
+        }
+
+        /// <summary>
+        /// Sets the viewstate of the open tab.
+        /// The requires Logic software version 1.2.18 or greater.
+        /// </summary>
+        /// <param name="zoom_samples_per_pixel">The zoom level, in samples per pixel. larger is more zoomed out. 1 represents 1 sample per pixel. (samples are realitve to the LCM rate)</param>
+        /// <param name="pan_starting_sample">The sample index of the left edge of the display, relative to the LCM sample rate</param>
+        public void SetViewState( double zoom_samples_per_pixel, double pan_starting_sample )
+        {
+            String export_command = String.Format("{0}, {1:f}, {2:f}", set_viewstate_cmd, zoom_samples_per_pixel, pan_starting_sample);
+            WriteString(export_command);
+
+            String response = "";
+            GetResponse(ref response);
+        }
 
 		private bool TryParseDeviceType( string input, out DeviceType device_type )
 		{

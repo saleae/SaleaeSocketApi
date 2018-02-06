@@ -326,6 +326,42 @@ namespace Saleae.SocketApi
 		public int Index { get; set; }
 	}
 
+    public struct CaptureRange
+    {
+        /// <summary>
+        /// The first valid sample of data. Usually 0, unless a trigger was used, and the entire pre-trigger buffer has been filled, so older pre-trigger data has been discarded.
+        /// </summary>
+        public UInt64 StartingSample { get; set; }
+        /// <summary>
+        /// The time 0 trigger sample. When no trigger is used, this is 0
+        /// </summary>
+        public UInt64 TriggerSample { get; set; }
+        /// <summary>
+        /// This is the last sample in the capture
+        /// </summary>
+        public UInt64 EndingSample { get; set; }
+        /// <summary>
+        /// The LCM sample rate of the capture, which is least common multiple of the digital and analog sample rates. All sample indexes are relative to the LCM sample rate.
+        /// </summary>
+        public UInt32 LcmSampleRate { get; set; }
+    }
+
+    public struct ViewState
+    {
+        /// <summary>
+        /// The display zoom level, given in samples (floating point) per pixel. Larger is more zoomed out. 1 indicates 1 sample per pixel.
+        /// </summary>
+        public double ZoomSamplesPerPixel { get; set; }
+        /// <summary>
+        /// The sample index of the left edge of the screen. 
+        /// </summary>
+        public double PanStartingSample { get; set; }
+        /// <summary>
+        /// The LCM sample rate of the capture, which is least common multiple of the digital and analog sample rates. All sample indexes are relative to the LCM sample rate.
+        /// </summary>
+        public UInt32 LcmSampleRate { get; set; }
+    }
+
 	public class SaleaeSocketApiException : Exception
 	{
 		public SaleaeSocketApiException()
