@@ -459,14 +459,15 @@ namespace Saleae.SocketApi
 			GetResponse( ref response );
 		}
 
-		/// <summary>
-		/// This replaced the hard to use and buggy EXPORT_DATA command.
-		/// </summary>
-		/// <param name="export_settings"></param>
-		/// <param name="capture_contains_digital_channels"></param>
-		/// <param name="capture_contains_analog_channels"></param>
-		/// <returns></returns>
-		public bool ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
+        /// <summary>
+        /// This replaced the hard to use and buggy EXPORT_DATA command. The additional parameters, capture_contains_digital_channels and capture_contains_analog_channels, must be set if the capture itself contains channels of those types.
+        /// This is because some export commands, such as digital-only exports and analog-only exports vary slightly if the source capture contains both digital and analog only channels.
+        /// </summary>
+        /// <param name="export_settings"></param>
+        /// <param name="capture_contains_digital_channels">Set to true if the capture contains digital channels.</param>
+        /// <param name="capture_contains_analog_channels">Set to true if the capture contains analog channels.</param>
+        /// <returns></returns>
+        public bool ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
 		{
 			bool is_mixed_mode_capture = capture_contains_digital_channels && capture_contains_analog_channels; //different export options happen in this case.
 			if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection.AllChannels )
