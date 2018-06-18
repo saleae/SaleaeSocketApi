@@ -878,7 +878,7 @@ namespace Saleae.SocketApi
 			analog_channels.Clear();
 
 			String[] input_string = response.Split( '\n' );
-			String[] channels_string = input_string[ 0 ].Split( ',' );
+			String[] channels_string = input_string[ 0 ].Split( ',' ).Select( x => x.Trim() ).ToArray();
 
 			bool add_to_digital_channel_list = true;
 			for( int i = 0; i < channels_string.Length; ++i )

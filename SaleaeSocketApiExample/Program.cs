@@ -90,9 +90,14 @@ namespace Saleae.SocketApi
 				Console.WriteLine( "" );
 				Console.WriteLine( "Press Enter to Continue" );
 				Console.ReadLine();
-
-				//display the currently selected sample rate and performance option.
-				var current_sample_rate = Client.GetSampleRate();
+                //showing active channels
+                List<int> active_digital_channels = new List<int>();
+                List<int> active_analog_channels = new List<int>();
+                Client.GetActiveChannels(active_digital_channels, active_analog_channels);
+                Console.WriteLine("Active Digital Channels: " + String.Join(", ", active_digital_channels.ToArray()));
+                Console.WriteLine("Active Analog Channels: " + String.Join(", ", active_analog_channels.ToArray()));
+                //display the currently selected sample rate and performance option.
+                var current_sample_rate = Client.GetSampleRate();
 				Console.WriteLine( "The previously selected sample rate was: " + current_sample_rate.DigitalSampleRate.ToString() + " SPS (digital), " + current_sample_rate.AnalogSampleRate.ToString() + " SPS (analog)" );
 				if( current_sample_rate.AnalogSampleRate > 0 && current_sample_rate.DigitalSampleRate > 0 )
 				{
