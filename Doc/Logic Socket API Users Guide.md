@@ -137,7 +137,7 @@ This command changes the number of samples to capture. (Note: USB transfer
 chunks are about 33ms of data, so the number of samples you actually get are in
 steps of 33ms)
 
-If both analog and digital channels are enabled, this sets the number of digital samples to record.
+If both analog and digital channels are enabled, this sets the number of digital samples to record, and not the least common multiple of analog and digital, as some other functions do.
 
 Example:
 
@@ -157,7 +157,7 @@ This function takes an integer to set the desired number of samples.
 
 This function returns the number of samples to capture.
 
-If both digital and analog channels are enabled, this returns the number of digital channels to record.
+If both digital and analog channels are enabled, this returns the number of samples at the LCM sample rate, which is the least common multiple of the digital and analog sample rates.
 
 Example:
 
@@ -165,9 +165,13 @@ Example:
 
 Return Value:
 
-`1000000`
+`1000000\n`
 
-This function is not wrapped by the C# wrapper presently.
+**C# Function:** `int GetNumSamples()`
+
+This function returns the number of samples to capture for.
+
+Specifically, in mixed mode captures, it returns the number of samples at the LCM sample rate, which is the least common multiple of the digital and analog sample rates.
 
 
 **Socket Command: set_capture_seconds**

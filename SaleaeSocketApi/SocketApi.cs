@@ -20,7 +20,8 @@ namespace Saleae.SocketApi
 
 		//Command strings
 		const String set_trigger_cmd = "SET_TRIGGER";
-		const String set_num_samples_cmd = "SET_NUM_SAMPLES";
+        const String get_num_samples_cmd = "GET_NUM_SAMPLES";
+        const String set_num_samples_cmd = "SET_NUM_SAMPLES";
 		const String get_sample_rate_cmd = "GET_SAMPLE_RATE";
 		const String set_sample_rate_cmd = "SET_SAMPLE_RATE";
 
@@ -143,6 +144,19 @@ namespace Saleae.SocketApi
 			String response = "";
 			GetResponse( ref response );
 		}
+
+        /// <summary>
+        /// Get the number of samples to capture
+        /// </summary>
+        /// <returns></returns>
+        public int GetNumSamples()
+        {
+            WriteString(get_num_samples_cmd);
+            String response = "";
+            GetResponse(ref response);
+
+            return int.Parse(response.Split('\n').First());
+        }
 
 		/// <summary>
 		/// Set number of samples for capture
