@@ -955,6 +955,14 @@ namespace Saleae.SocketApi
 		}
 
         /// <summary>
+        /// Close the Logic software. this will close the socket.
+        /// </summary>
+        public void Exit()
+        {
+            WriteString(exit);
+        }
+
+        /// <summary>
         /// Returns the index of the first valid sample (0, unless a trigger was used)
         /// The trigger Sample (0, unless a trigger was used)
         /// The ending sample.

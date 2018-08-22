@@ -1221,7 +1221,6 @@ This command closes the software. It returns `ACK` before the software exits.
 
 Syntax: `exit`
 
+**C# Function:** `void Exit()`
 
-**C# Function:**
-
-This function is not currently covered by the C# wrapper.
+Do not call any other commands after closing the software. The `SaleaeClient` class was not designed to be reconnectable, so the best way to establish a new connection would be to construct a new one.
