@@ -414,6 +414,7 @@ struct ConnectedDevices
 ```
 
 Usage Note:
+
 Detecting if Logic hardware is connected to the PC can be determined by GetConnectedDevices(). If no Logic hardware is connected, 4 devices show up when you call GetConnectedDevices(). These are demo devices, and the response is similar to below.
 
 ```
