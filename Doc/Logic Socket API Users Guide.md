@@ -413,6 +413,20 @@ struct ConnectedDevices
 }
 ```
 
+Usage Note:
+Detecting if Logic hardware is connected to the PC can be determined by GetConnectedDevices(). If no Logic hardware is connected, 4 devices show up when you call GetConnectedDevices(). These are demo devices, and the response is similar to below.
+
+```
+1, Logic 8, LOGIC_8_DEVICE, 0x2dc9, ACTIVE
+2, Logic Pro 8, LOGIC_PRO_8_DEVICE, 0x7243
+3, Logic Pro 16, LOGIC_PRO_16_DEVICE, 0x673f
+4, Logic 4, LOGIC_4_DEVICE, 0x6709
+ACK
+```
+
+All demo devices will go away once a real device is connected. Simply wait a bit once the device is connected, send the GetConnectedDevices() command, and the real device will show up as device #1.
+
+The device ID for the demo devices are 16-bit. The device ID for real devices are 64-bit. That is another way you can tell them apart.
 
 
 ### Select Active Device
