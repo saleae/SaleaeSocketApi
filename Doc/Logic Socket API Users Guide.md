@@ -253,7 +253,7 @@ Response: `$(digital sample rate), $(analog_sample_rate)`
 
 
 
-**C# function:** `List<SampleRate> GetAvaliableSampleRates()`
+**C# function:** `List<SampleRate> GetAvailableSampleRates()`
 
 This function returns a list of all the sample rates available for the current
 performance option and channel combination.
