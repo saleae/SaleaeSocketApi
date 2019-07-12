@@ -1090,7 +1090,8 @@ namespace Saleae.SocketApi
 					str += ( char )buffer[ i ];
 				}
 
-				if( bytes_read < max_length )
+				// if there is no more data available, then we can stop reading.
+				if( !stream.DataAvailable )
 					break;
 			}
 			return str;
