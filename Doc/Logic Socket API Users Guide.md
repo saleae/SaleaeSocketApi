@@ -539,7 +539,7 @@ This feature is only supported on the original Logic 16, and the new Logic Pro
 
 Example:
 
-`get_full_scale_voltage_range`
+`get_digital_voltage_options`
 
 Response:
 
@@ -568,7 +568,7 @@ This feature is only supported on the original Logic 16, and the new Logic Pro
 
 Example:
 
-`set_full_scale_voltage_range, 0`
+`set_digital_voltage_option, 0`
 
 
 
