@@ -89,7 +89,7 @@ Client.FunctionCall();
 
 This command lets you configure the trigger. The command must be sent with the
 same number of parameters as there are channels in the software. For use with
-Logic, 8 parameters must be present. Blank parameters are allowed. Also, if the trigger type is `negedge` or `posedge`, then the minimum and maximum pulse widths should be included immediately after the trigger type. Only a minimum pulse width is required though. If no maximum pulse width is specified, then any pulse longer than the specified minimum will be a valid trigger condition.
+Logic, 8 parameters must be present. Blank parameters are allowed. Also, if the trigger type is `negpulse` or `pospulse`, then the minimum and maximum pulse widths should be included immediately after the trigger type. Only a minimum pulse width is required though. If no maximum pulse width is specified, then any pulse longer than the specified minimum will be a valid trigger condition.
 
 Parameter value options:
 
