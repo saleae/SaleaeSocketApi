@@ -87,7 +87,7 @@ Client.FunctionCall();
 
 **Socket Command: set_trigger**
 
-This command lets you configure the trigger. The command must be sent with the same number of parameters as there are available digital channels for your logic analyzer model. For example, Logic 8 will require exactly 8 parameters to be present, while Logic Pro 16 will require exactly 16 parameters to be present. Blank parameters are to be used for channels that will not contain any trigger configurations. Also, if the trigger type is `negpulse` or `pospulse`, then the minimum and maximum pulse widths should be included immediately after the trigger type. Only a minimum pulse width is required though. If no maximum pulse width is specified, then any pulse longer than the specified minimum will be a valid trigger condition.
+This command lets you configure the trigger. The command must be sent with the same number of parameters as there are active digital channels (analog channels are ignored). For example, if you currently have 6 active digital channels enabled, then the command will require 6 parameters to be present. Blank parameters are to be used for active channels that will not contain any trigger configurations. Also, if the trigger type is `negpulse` or `pospulse`, then the minimum and maximum pulse widths should be included immediately after the trigger type. Only a minimum pulse width is required though. If no maximum pulse width is specified, then any pulse longer than the specified minimum will be a valid trigger condition.
 
 Parameter value options:
 
